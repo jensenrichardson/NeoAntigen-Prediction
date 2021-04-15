@@ -1,0 +1,46 @@
+# The main entry point of your workflow.
+# After configuring, running snakemake -n in a clone of this repository should successfully execute a dry-run of the workflow.
+
+from snakemake.utils import min_version
+min_version("6.0")
+
+report: "report/workflow.rst"
+
+# Allow users to fix the underlying OS via singularity.
+singularity: "docker://continuumio/miniconda3"
+
+configfile: "config/config.yaml"
+
+import pandas as pd
+import ast
+samples = pd.read_table(config["samples_tsv"], converters={"files": ast.literal_eval}).set_index("sample_name", drop=False)
+wildcard_constraints:
+    sample ="|".join(samples.index.tolist())
+
+
+subworkflow dna_variant:
+	workdir:
+		"/scratch/07467/jwr2735/dna-variant-calling"
+	snakefile:
+		"/scratch/07467/jwr2735/dna-variant-calling/workflow/Snakefile"
+
+subworkflow dna_preprocess:
+	workdir:
+		"/scratch/07467/jwr2735/dna-preprocess"
+	snakefile:
+		"/scratch/07467/jwr2735/dna-preprocess/Snakefile"
+
+subworkflow rna_seq:
+	workdir:
+		"/scratch/07467/jwr2735/rna-seq"
+	snakefile:
+		"/scratch/07467/jwr2735/rna-seq/workflow/Snakefile"
+
+rule all:
+    input:
+        # The first rule should define the default target files
+        # Subsequent target rules can be specified below. They should start with all_*.
+        expand("HLAtypes/{sample}/winners.hla.txt", sample=samples.to_dict('index'))
+
+
+include: "rules/Polysolver.smk"

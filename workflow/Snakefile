@@ -1,0 +1,47 @@
+# The main entry point of your workflow.
+# After configuring, running snakemake -n in a clone of this repository should successfully execute a dry-run of the workflow.
+
+from snakemake.utils import min_version
+min_version("6.0")
+
+report: "report/workflow.rst"
+
+# Allow users to fix the underlying OS via singularity.
+singularity: "docker://continuumio/miniconda3"
+
+configfile: "config/config.yaml"
+
+# Importing samples
+import pandas as pd
+import ast
+import yaml
+samples = pd.read_table(config["samples_tsv"], converters={"files": ast.literal_eval}).set_index("sample_name", drop=False)
+wildcard_constraints:
+    sample ="|".join(samples.index.tolist())
+
+rule all:
+    input:
+        # The first rule should define the default target files
+        # Subsequent target rules can be specified below. They should start with all_*.
+        expand("HLAtypes/{sample}/winners.hla.txt", sample=samples.to_dict('index'))
+
+include: "rules/Polysolver.smk"
+
+# Importing module and config files
+rna_config = {}
+with open(config["rna_seq_config"]) as rna_config_file:
+    rna_config = yaml.load(rna_config_file, Loader=yaml.FullLoader)
+
+module RnaSeq:
+    snakefile: "https://raw.githubusercontent.com/jensenrichardson/rna-seq/main/workflow/Snakefile"
+    config: rna_config
+use rule * from RnaSeq as RnaSeq*
+
+dna_preprocess_config = {}
+with open(config["dna_preprocess_config"]) as dna_preprocess_config_file:
+    dna_preprocess_config = yaml.load(dna_preprocess_config_file, Loader=yaml.FullLoader)
+module DnaPreprocess:
+    snakefile: "https://raw.githubusercontent.com/jensenrichardson/dna-preprocess/main/Snakefile"
+    config: dna_preprocess_config
+use rule * from DnaPreprocess as DnaPreprocess*
+
