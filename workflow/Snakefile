@@ -23,9 +23,14 @@ rule all:
     input:
         # The first rule should define the default target files
         # Subsequent target rules can be specified below. They should start with all_*.
-        expand("HLAtypes/{sample}/winners.hla.txt", sample=samples.to_dict('index'))
+        #"HLAtypes/hla_types.txt"
+        expand("results/{sample}/{sample}.neoantigens.txt", sample=samples.to_dict('index'))
+        #expand("12-FinalCalls/{sample}/{sample}.vcf", sample=samples.to_dict('index'))
 
 include: "rules/Polysolver.smk"
+include: "rules/ReformatHLATypes.smk"
+include: "rules/NeoPredPipe.smk"
+include: "rules/RenameVcf.smk"
 
 # Importing module and config files
 rna_config = {}
@@ -44,4 +49,12 @@ module DnaPreprocess:
     snakefile: "https://raw.githubusercontent.com/jensenrichardson/dna-preprocess/main/Snakefile"
     config: dna_preprocess_config
 use rule * from DnaPreprocess as DnaPreprocess*
+
+dna_variant_config = {}
+with open(config["dna_variant_config"]) as dna_variant_config_file:
+    dna_variant_config = yaml.load(dna_variant_config_file, Loader=yaml.FullLoader)
+module DnaVariant:
+    snakefile: "https://raw.githubusercontent.com/jensenrichardson/dna-variant-calling/main/workflow/Snakefile"
+    config: dna_variant_config
+use rule * from DnaVariant as DnaVariant*
 

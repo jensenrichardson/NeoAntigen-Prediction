@@ -1,0 +1,7 @@
+name: NeoPredPipe
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=2.7
+  - biopython
