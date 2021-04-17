@@ -5,10 +5,10 @@ rule NeoPredPipe:
         genecounts="01-Kallisto/{sample}/abundance_counts_only.tsv"
     output:
         folder=directory("results/{sample}"),
-        indelssum="results/{sample}/{sample}.neoantigens.Indels.summarytable.txt",
-        indels="results/{sample}/{sample}.neoantigens.Indelstxt",
-        pointsum="results/{sample}/{sample}.neoantigens.summarytable.txt",
-        point="results/{sample}/{sample}.neoantigens.txt"
+        indelssum=protected("results/{sample}/{sample}.neoantigens.Indels.summarytable.txt"),
+        indels=protected("results/{sample}/{sample}.neoantigens.Indelstxt"),
+        pointsum=protected("results/{sample}/{sample}.neoantigens.summarytable.txt"),
+        point=protected("results/{sample}/{sample}.neoantigens.txt")
     log: "results/{sample}/{sample}.log"
     resources:
         runtime=lambda wildcards, attempt: 480 * attempt
