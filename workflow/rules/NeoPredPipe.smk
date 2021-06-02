@@ -10,7 +10,7 @@ rule NeoPredPipe:
         point=protected("results/{sample}/{sample}.neoantigens.txt")
     log: "results/{sample}/{sample}.log"
     resources:
-        runtime=lambda wildcards, attempt: 480 * attempt
+        runtime=lambda wildcards, attempt: 240 * attempt
     group:
         "NeoPredPipe"
     params:
@@ -28,5 +28,5 @@ rule NeoPredPipe:
         "-o results/{wildcards.sample} "
         "-n {wildcards.sample} "
         "-x {input.genecounts} "
-        "-m "
+        "-m -d "
         "&> {log} "
