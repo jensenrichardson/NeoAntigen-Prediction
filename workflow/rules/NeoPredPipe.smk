@@ -4,13 +4,13 @@ rule NeoPredPipe:
         hlatypes="HLAtypes/{sample}/hla_types.txt",
         genecounts="01-Kallisto/{sample}/abundance_counts_only.tsv"
     output:
-        indelssum=protected("results/{sample}/{sample}.neoantigens.Indels.summarytable.txt"),
-        indels=protected("results/{sample}/{sample}.neoantigens.Indels.txt"),
-        pointsum=protected("results/{sample}/{sample}.neoantigens.summarytable.txt"),
-        point=protected("results/{sample}/{sample}.neoantigens.txt")
+        indelssum="results/{sample}/{sample}.neoantigens.Indels.summarytable.txt",
+        indels="results/{sample}/{sample}.neoantigens.Indels.txt",
+        pointsum="results/{sample}/{sample}.neoantigens.summarytable.txt",
+        point="results/{sample}/{sample}.neoantigens.txt"
     log: "results/{sample}/{sample}.log"
     resources:
-        runtime=lambda wildcards, attempt: 240 * attempt
+        runtime=lambda wildcards, attempt: 1440 * attempt
     group:
         "NeoPredPipe"
     params:
